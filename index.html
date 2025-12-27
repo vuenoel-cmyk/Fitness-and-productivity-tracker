@@ -1,0 +1,3716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Teshia's Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #F4A259;
+            --gold-light: #FFD4A3;
+            --pink: #F2B5D4;
+            --pink-dark: #E88FC3;
+            --blue: #7EC8E3;
+            --blue-dark: #5BA4C9;
+            --purple: #A78BFA;
+            --purple-light: #C4B5FD;
+            --green: #6EE7B7;
+            --green-dark: #34D399;
+            --coral: #FF6B6B;
+            --bg-gradient: linear-gradient(135deg, #FFF5EB 0%, #FDE8E8 50%, #F3E8FF 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-primary: #2D3748;
+            --text-secondary: #718096;
+            --shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 15px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Confetti Container */
+        #confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            animation: confetti-fall 3s ease-out forwards;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--purple) 0%, var(--pink-dark) 100%);
+            padding: 20px;
+            text-align: center;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .header .date {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .streak-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .streak-badge .fire {
+            font-size: 1.2rem;
+        }
+
+        /* Navigation - Hamburger Menu */
+        .nav-container {
+            position: fixed;
+            top: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .hamburger-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 45px;
+            height: 45px;
+            background: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            z-index: 1001;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .hamburger-btn span {
+            display: block;
+            width: 22px;
+            height: 3px;
+            background: var(--purple);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger-btn.open span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 6px);
+        }
+
+        .hamburger-btn.open span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger-btn.open span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -6px);
+        }
+
+        .nav-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+
+        .nav-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .nav-menu {
+            position: fixed;
+            top: 0;
+            right: -280px;
+            width: 280px;
+            height: 100%;
+            background: white;
+            padding: 80px 20px 30px;
+            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .nav-menu.open {
+            right: 0;
+        }
+
+        .nav-menu-header {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            padding-left: 15px;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+            padding: 16px 20px;
+            border: none;
+            border-radius: 15px;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: transparent;
+            color: var(--text-primary);
+            text-align: left;
+            margin-bottom: 8px;
+        }
+
+        .nav-btn:hover {
+            background: #F7FAFC;
+            transform: translateX(5px);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, var(--purple) 0%, var(--pink-dark) 100%);
+            color: white;
+        }
+
+        .nav-btn .nav-icon {
+            font-size: 1.3rem;
+        }
+
+        /* Hide old nav on mobile */
+        .nav {
+            display: none;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Sections */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 0;
+            margin-bottom: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+            transition: all 0.3s ease;
+            border: none;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #F3F0FF 0%, #FAF5FF 100%);
+            padding: 12px 20px;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .card-header .step-label {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #6B7280;
+        }
+
+        .card-body {
+            padding: 20px 25px 25px;
+        }
+
+        .progress-card-gradient {
+            border: 3px solid transparent;
+            background-image: linear-gradient(white, white), linear-gradient(135deg, #A78BFA 0%, #E88FC3 100%);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+        }
+
+        .card:hover {
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-icon {
+            font-size: 1.5rem;
+        }
+
+        /* Daily Quote */
+        .quote-card {
+            background: linear-gradient(135deg, var(--gold-light) 0%, var(--pink) 100%);
+            text-align: center;
+            padding: 30px;
+        }
+
+        .quote-text {
+            font-size: 1.1rem;
+            font-style: italic;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .quote-source {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        /* Progress Ring */
+        .progress-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .progress-ring {
+            position: relative;
+            width: 150px;
+            height: 150px;
+        }
+
+        .progress-ring svg {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring circle {
+            fill: none;
+            stroke-width: 10;
+        }
+
+        .progress-ring .bg {
+            stroke: #E2E8F0;
+        }
+
+        .progress-ring .progress {
+            stroke: url(#gradient);
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.5s ease;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .progress-percent {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--purple);
+        }
+
+        .progress-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Task List */
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #F7FAFC;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .task-item:hover {
+            background: #EDF2F7;
+            transform: translateX(5px);
+        }
+
+        .task-item.completed {
+            background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+            color: white;
+        }
+
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+            opacity: 0.9;
+        }
+
+        .checkbox {
+            width: 30px;
+            height: 30px;
+            border: 3px solid var(--purple);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .task-item.completed .checkbox {
+            background: white;
+            border-color: white;
+        }
+
+        .checkbox .checkmark {
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s ease;
+            color: var(--green-dark);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .task-item.completed .checkbox .checkmark {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .task-icon {
+            font-size: 1.3rem;
+        }
+
+        .task-text {
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .task-item.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 15px;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--purple) 0%, var(--pink-dark) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(167, 139, 250, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--gold) 0%, var(--coral) 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--purple);
+            color: var(--purple);
+        }
+
+        .btn-outline:hover {
+            background: var(--purple);
+            color: white;
+        }
+
+        /* Workout Mode Selection */
+        .mode-selection {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .mode-btn {
+            padding: 30px 20px;
+            border: 3px solid #E2E8F0;
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .mode-btn:hover {
+            border-color: var(--purple);
+            transform: translateY(-5px);
+        }
+
+        .mode-btn.selected {
+            border-color: var(--purple);
+            background: linear-gradient(135deg, var(--purple-light) 0%, var(--pink) 100%);
+        }
+
+        .mode-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .mode-label {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .mode-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        /* Exercise Card */
+        .exercise-card {
+            background: var(--card-bg);
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .exercise-demo {
+            width: 100%;
+            height: 280px;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #F7FAFC 0%, #EDF2F7 100%);
+        }
+
+        .exercise-demo::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: linear-gradient(to top, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 100%);
+            pointer-events: none;
+        }
+
+        .exercise-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            transition: transform 0.3s ease;
+        }
+
+        .exercise-card:hover .exercise-image {
+            transform: scale(1.03);
+        }
+
+        .exercise-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(167, 139, 250, 0.15) 0%, rgba(232, 143, 195, 0.15) 100%);
+            pointer-events: none;
+        }
+
+        .exercise-illustration {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .exercise-illustration svg {
+            width: 200px;
+            height: 200px;
+        }
+
+        .exercise-content {
+            padding: 25px;
+        }
+
+        /* Workout List View */
+        .workout-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .workout-exercise-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: none;
+            transition: all 0.3s ease;
+            border: 1px solid #E2E8F0;
+        }
+
+        .workout-exercise-card.all-complete {
+            border: 3px solid var(--green);
+        }
+
+        .exercise-image-container {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .exercise-image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .exercise-image-fade {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: linear-gradient(to bottom, transparent, white);
+            pointer-events: none;
+        }
+
+        .exercise-header {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, #F7FAFC 0%, #EDF2F7 100%);
+        }
+
+        .exercise-thumb {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            overflow: hidden;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .exercise-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .exercise-thumb-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(167, 139, 250, 0.1) 0%, rgba(232, 143, 195, 0.1) 100%);
+        }
+
+        .exercise-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .exercise-info h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .exercise-info .muscle-tag {
+            font-size: 0.8rem;
+            color: var(--purple);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .exercise-info .sets-reps {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .exercise-body {
+            padding: 15px;
+        }
+
+        .form-tips {
+            background: #F7FAFC;
+            padding: 12px 15px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+        }
+
+        .form-tips strong {
+            color: var(--purple);
+        }
+
+        .sets-checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .set-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            background: white;
+            border: 2px solid #E2E8F0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .set-item:hover {
+            border-color: var(--purple-light);
+            transform: translateX(5px);
+        }
+
+        .set-item.checked {
+            background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+            border-color: var(--green);
+            color: white;
+        }
+
+        .set-checkbox {
+            width: 28px;
+            height: 28px;
+            border: 3px solid var(--purple);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .set-item.checked .set-checkbox {
+            background: white;
+            border-color: white;
+        }
+
+        .set-checkbox .set-checkmark {
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s ease;
+            color: var(--green-dark);
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .set-item.checked .set-checkbox .set-checkmark {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .set-label {
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .set-reps {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        /* Workout Summary Bar */
+        .workout-summary-bar {
+            position: sticky;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            padding: 15px 20px;
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 20px 20px 0 0;
+            z-index: 50;
+        }
+
+        .summary-progress {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .summary-progress-bar {
+            flex: 1;
+            height: 12px;
+            background: #E2E8F0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .summary-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--purple) 0%, var(--green) 100%);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .summary-text {
+            font-weight: 700;
+            color: var(--purple);
+            white-space: nowrap;
+        }
+
+        .expand-exercise {
+            background: none;
+            border: none;
+            color: var(--purple);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px;
+            transition: transform 0.3s ease;
+        }
+
+        .expand-exercise.expanded {
+            transform: rotate(180deg);
+        }
+
+        .exercise-name {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .exercise-muscle {
+            color: var(--purple);
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .exercise-reps {
+            background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 100%);
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .exercise-form {
+            background: #F7FAFC;
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .exercise-form strong {
+            color: var(--purple);
+        }
+
+        /* Timer */
+        .timer-container {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .timer-display {
+            font-size: 5rem;
+            font-weight: 800;
+            color: var(--purple);
+            font-family: 'Montserrat', sans-serif;
+            margin-bottom: 10px;
+        }
+
+        .timer-label {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .timer-message {
+            font-size: 1.1rem;
+            font-style: italic;
+            color: var(--pink-dark);
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--pink);
+            border-radius: 15px;
+            opacity: 0.9;
+        }
+
+        /* Progress Bar */
+        .workout-progress {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .workout-progress-bar {
+            flex: 1;
+            height: 10px;
+            background: #E2E8F0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .workout-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--purple) 0%, var(--pink-dark) 100%);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .workout-progress-text {
+            font-weight: 700;
+            color: var(--purple);
+            white-space: nowrap;
+        }
+
+        /* Sleep Input */
+        .sleep-input-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .sleep-input {
+            width: 100px;
+            padding: 18px 15px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-align: center;
+            border: 2px solid #E2E8F0;
+            border-radius: 15px;
+            font-family: 'Nunito', sans-serif;
+            color: var(--purple);
+            background: #F8FAFC;
+            transition: all 0.3s ease;
+        }
+
+        .sleep-input:focus {
+            outline: none;
+            border-color: var(--purple);
+            box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.2);
+            background: white;
+        }
+
+        .sleep-label {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        /* Badges */
+        .badges-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .badge {
+            text-align: center;
+            padding: 20px 10px;
+            border-radius: 20px;
+            background: #F7FAFC;
+            transition: all 0.3s ease;
+        }
+
+        .badge.earned {
+            background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 100%);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .badge.locked {
+            opacity: 0.4;
+            filter: grayscale(100%);
+        }
+
+        .badge-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .badge-name {
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .badge-progress {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        /* Scripture Library */
+        .scripture-categories {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .scripture-cat-btn {
+            padding: 15px;
+            border: 2px solid #E2E8F0;
+            border-radius: 15px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .scripture-cat-btn:hover, .scripture-cat-btn.active {
+            border-color: var(--purple);
+            background: var(--purple-light);
+            color: white;
+        }
+
+        .scripture-card {
+            background: white;
+            color: #1a1a2e;
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 15px;
+            position: relative;
+            border: 3px solid transparent;
+            background-image: linear-gradient(white, white), linear-gradient(135deg, #A78BFA 0%, #E88FC3 100%);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+            box-shadow: 0 4px 15px rgba(167, 139, 250, 0.15);
+        }
+
+        .scripture-text {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            margin-bottom: 15px;
+            font-style: italic;
+            color: #1a1a2e;
+        }
+
+        .scripture-ref {
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        /* Self-Care Check-in */
+        .checkin-question {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .checkin-question h3 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .checkin-options {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .checkin-option {
+            padding: 15px 25px;
+            border: 3px solid #E2E8F0;
+            border-radius: 25px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .checkin-option:hover {
+            border-color: var(--purple);
+            transform: translateY(-3px);
+        }
+
+        .checkin-option.selected {
+            border-color: var(--purple);
+            background: var(--purple);
+            color: white;
+        }
+
+        .checkin-textarea {
+            width: 100%;
+            padding: 15px;
+            border: 3px solid #E2E8F0;
+            border-radius: 15px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem;
+            resize: none;
+            min-height: 100px;
+            transition: all 0.3s ease;
+        }
+
+        .checkin-textarea:focus {
+            outline: none;
+            border-color: var(--purple);
+            box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.3);
+        }
+
+        /* Business Tasks Gate */
+        .gate-message {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, var(--pink) 0%, var(--purple-light) 100%);
+            border-radius: 20px;
+            margin: 20px 0;
+        }
+
+        .gate-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+
+        .gate-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+        }
+
+        /* Workout Complete Screen */
+        .workout-complete {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .complete-icon {
+            font-size: 6rem;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .complete-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--purple) 0%, var(--pink-dark) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .complete-affirmation {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .complete-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--purple);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Breathing Reminder */
+        .breathing-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .breathing-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .breathing-content {
+            text-align: center;
+            color: white;
+            padding: 40px;
+        }
+
+        .breathing-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--purple) 0%, var(--pink-dark) 100%);
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: breathe 8s infinite;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.3); }
+            50% { transform: scale(1.3); }
+            75% { transform: scale(1); }
+        }
+
+        .breathing-text {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .breathing-instruction {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        .close-breathing {
+            margin-top: 30px;
+            padding: 15px 40px;
+            border: 2px solid white;
+            border-radius: 25px;
+            background: transparent;
+            color: white;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close-breathing:hover {
+            background: white;
+            color: var(--purple);
+        }
+
+        /* Mood Check-in Overlay */
+        .mood-checkin-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .mood-checkin-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mood-checkin-content {
+            text-align: center;
+            color: white;
+            padding: 40px 20px;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .mood-step {
+            animation: fadeInUp 0.4s ease;
+        }
+
+        .mood-step.hidden {
+            display: none;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .mood-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--purple) 0%, var(--pink-dark) 100%);
+            margin: 0 auto 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 40px rgba(167, 139, 250, 0.4);
+        }
+
+        .mood-circle.breathing-animation {
+            animation: breathe 8s infinite;
+        }
+
+        .mood-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .mood-subtitle {
+            font-size: 1rem;
+            opacity: 0.7;
+            margin-bottom: 30px;
+        }
+
+        .mood-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .mood-btn {
+            padding: 14px 24px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mood-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .mood-btn-positive {
+            background: linear-gradient(135deg, var(--purple) 0%, var(--pink-dark) 100%);
+            border-color: transparent;
+        }
+
+        .mood-btn-positive:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(167, 139, 250, 0.4);
+        }
+
+        .mood-message {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            opacity: 0.9;
+            margin-bottom: 25px;
+        }
+
+        .mood-instruction {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .mood-scripture {
+            font-size: 1.2rem;
+            font-style: italic;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            padding: 0 20px;
+        }
+
+        .mood-scripture-ref {
+            font-size: 1rem;
+            font-weight: 700;
+            opacity: 0.8;
+        }
+
+        .mood-continue-btn {
+            margin-top: 25px;
+            padding: 16px 40px;
+            border: none;
+            border-radius: 30px;
+            background: linear-gradient(135deg, var(--purple) 0%, var(--pink-dark) 100%);
+            color: white;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mood-continue-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 25px rgba(167, 139, 250, 0.5);
+        }
+
+        /* Weekly Summary */
+        .weekly-summary {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, var(--green) 0%, var(--blue) 100%);
+            border-radius: 20px;
+            color: white;
+        }
+
+        .weekly-summary h3 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+
+        .weekly-days {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .weekly-day {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        .weekly-day.completed {
+            background: white;
+            color: var(--green-dark);
+        }
+
+        /* Input Styles */
+        input[type="time"], input[type="number"] {
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: 3px solid var(--purple);
+            border-radius: 15px;
+            font-family: 'Nunito', sans-serif;
+            color: var(--purple);
+            text-align: center;
+        }
+
+        input[type="time"]:focus, input[type="number"]:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.3);
+        }
+
+        /* Hidden */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 400px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .nav-btn {
+                padding: 8px 15px;
+                font-size: 0.85rem;
+            }
+
+            .badges-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .timer-display {
+                font-size: 4rem;
+            }
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--text-primary);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-weight: 600;
+            z-index: 10001;
+            transition: transform 0.3s ease;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Level up animation */
+        .level-up-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--coral) 100%);
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: white;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Confetti Container -->
+    <div id="confetti-container"></div>
+
+    <!-- Breathing Reminder Overlay -->
+    <div class="breathing-overlay" id="breathingOverlay">
+        <div class="breathing-content">
+            <div class="breathing-circle">
+                <span style="font-size: 3rem;">🌬️</span>
+            </div>
+            <div class="breathing-text">Take 3 Deep Breaths</div>
+            <div class="breathing-instruction" id="breathingInstruction">Breathe in... 4 seconds</div>
+            <button class="close-breathing" onclick="closeBreathing()">I Feel Better</button>
+        </div>
+    </div>
+
+    <!-- Mood Check-in Overlay -->
+    <div class="mood-checkin-overlay" id="moodCheckinOverlay">
+        <div class="mood-checkin-content">
+            <!-- Initial Question -->
+            <div id="moodQuestion" class="mood-step">
+                <div class="mood-circle">
+                    <span style="font-size: 3rem;">💜</span>
+                </div>
+                <div class="mood-title">How are you feeling today?</div>
+                <div class="mood-subtitle">Be honest with yourself</div>
+                <div class="mood-options">
+                    <button class="mood-btn" onclick="handleMood('anxious')">Anxious</button>
+                    <button class="mood-btn" onclick="handleMood('depressed')">Depressed</button>
+                    <button class="mood-btn" onclick="handleMood('tired')">Tired</button>
+                    <button class="mood-btn" onclick="handleMood('overwhelmed')">Overwhelmed</button>
+                    <button class="mood-btn" onclick="handleMood('weak')">Weak</button>
+                    <button class="mood-btn mood-btn-positive" onclick="handleMood('good')">Energized/Good</button>
+                </div>
+            </div>
+
+            <!-- Breathing Exercise Response -->
+            <div id="moodBreathing" class="mood-step hidden">
+                <div class="mood-circle breathing-animation">
+                    <span style="font-size: 3rem;">🌬️</span>
+                </div>
+                <div class="mood-title">Let's breathe together</div>
+                <div class="mood-instruction" id="moodBreathingInstruction">Breathe in... 4 seconds</div>
+                <button class="mood-continue-btn" onclick="completeMoodCheckin()">I Feel Better</button>
+            </div>
+
+            <!-- Tired Response -->
+            <div id="moodTired" class="mood-step hidden">
+                <div class="mood-circle">
+                    <span style="font-size: 3rem;">🛋️</span>
+                </div>
+                <div class="mood-title">Your body needs rest</div>
+                <div class="mood-message">
+                    Consider taking a 30-minute nap and enjoying a warm cup of tea. Rest is productive too.
+                </div>
+                <button class="mood-continue-btn" onclick="completeMoodCheckin()">I rested, let's continue</button>
+            </div>
+
+            <!-- Overwhelmed Response - Scripture -->
+            <div id="moodOverwhelmed" class="mood-step hidden">
+                <div class="mood-circle">
+                    <span style="font-size: 3rem;">🙏</span>
+                </div>
+                <div class="mood-title">Take a moment with God</div>
+                <div class="mood-scripture">
+                    "Casting all your care upon him; for he careth for you."
+                </div>
+                <div class="mood-scripture-ref">— 1 Peter 5:7 KJV</div>
+                <div class="mood-message" style="margin-top: 20px;">
+                    Take a moment to pray or simply sit in His presence.
+                </div>
+                <button class="mood-continue-btn" onclick="showBreathingAfterPrayer()">Continue to Breathing</button>
+            </div>
+
+            <!-- Weak Response - Nourishment Check -->
+            <div id="moodWeak" class="mood-step hidden">
+                <div class="mood-circle">
+                    <span style="font-size: 3rem;">🍽️</span>
+                </div>
+                <div class="mood-title">Let's check in</div>
+                <div class="mood-message">Have you eaten today? Had water?</div>
+                <div class="mood-options" style="margin-top: 20px;">
+                    <button class="mood-btn mood-btn-positive" onclick="completeMoodCheckin()">Yes, I have</button>
+                    <button class="mood-btn" onclick="showNourishReminder()">No, not yet</button>
+                </div>
+            </div>
+
+            <!-- Nourishment Reminder -->
+            <div id="moodNourish" class="mood-step hidden">
+                <div class="mood-circle">
+                    <span style="font-size: 3rem;">💧</span>
+                </div>
+                <div class="mood-title">Take care of your body first</div>
+                <div class="mood-message">
+                    Please eat something nourishing and drink some water before continuing. Your body needs fuel to thrive.
+                </div>
+                <button class="mood-continue-btn" onclick="completeMoodCheckin()">I've eaten & hydrated</button>
+            </div>
+
+            <!-- Good/Energized Response -->
+            <div id="moodGood" class="mood-step hidden">
+                <div class="mood-circle">
+                    <span style="font-size: 3rem;">✨</span>
+                </div>
+                <div class="mood-title">Great!</div>
+                <div class="mood-message">Let's show up for yourself today</div>
+                <button class="mood-continue-btn" onclick="completeMoodCheckin()">Let's Go</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <h1>Teshia's Tracker</h1>
+        <div class="date" id="currentDate"></div>
+        <div class="streak-badge">
+            <span>Consistency Streak:</span>
+            <span id="streakCount">0</span> days
+        </div>
+    </header>
+
+    <!-- Navigation - Hamburger Menu -->
+    <div class="nav-overlay" id="navOverlay" onclick="toggleMenu()"></div>
+    <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    <nav class="nav-menu" id="navMenu">
+        <div class="nav-menu-header">Navigate</div>
+        <button class="nav-btn active" data-section="dashboard" onclick="navigateTo('dashboard')">
+            Dashboard
+        </button>
+        <button class="nav-btn" data-section="workout" onclick="navigateTo('workout')">
+            Workout
+        </button>
+        <button class="nav-btn" data-section="scriptures" onclick="navigateTo('scriptures')">
+            Encouragement
+        </button>
+        <button class="nav-btn" data-section="progress" onclick="navigateTo('progress')">
+            Progress
+        </button>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="container">
+        <!-- SVG Gradient Definition -->
+        <svg width="0" height="0">
+            <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#A78BFA" />
+                    <stop offset="100%" style="stop-color:#E88FC3" />
+                </linearGradient>
+            </defs>
+        </svg>
+
+        <!-- Dashboard Section -->
+        <section class="section active" id="dashboard">
+            <!-- Logo and Motivational Message -->
+            <div style="text-align: center; padding: 0 20px 20px;">
+                <img src="images/Logo.png" alt="Logo" style="width: 100px; height: 100px; margin-bottom: 12px;">
+                <div style="color: #2D3748; font-size: 0.95rem; line-height: 1.7; font-weight: 700;">
+                    Progress over perfection. You're building consistency one day at a time. Let's show up for yourself today.
+                </div>
+            </div>
+
+            <!-- Divider -->
+            <div style="height: 1px; background: linear-gradient(to right, transparent, #4A5568, transparent); margin: 0 20px 20px;"></div>
+
+            <!-- Daily Quote -->
+            <div class="card quote-card">
+                <div class="card-body">
+                    <div class="quote-text" id="dailyQuote">"She is clothed with strength and dignity, and she laughs without fear of the future."</div>
+                    <div class="quote-source" id="quoteSource">— Proverbs 31:25</div>
+                </div>
+            </div>
+
+            <!-- Progress Ring -->
+            <div class="card progress-card-gradient">
+                <div class="card-body">
+                    <div class="card-title">
+                        Today's Progress
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-ring">
+                            <svg width="150" height="150">
+                                <circle class="bg" cx="75" cy="75" r="65"></circle>
+                                <circle class="progress" id="progressCircle" cx="75" cy="75" r="65"
+                                    stroke-dasharray="408.4" stroke-dashoffset="408.4"></circle>
+                            </svg>
+                            <div class="progress-text">
+                                <div class="progress-percent" id="progressPercent">0%</div>
+                                <div class="progress-label">Complete</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sleep Check-in (Morning) -->
+            <div class="card" id="sleepMorningCard">
+                <div class="card-header">
+                    <span class="step-label">Step 1</span>
+                </div>
+                <div class="card-body">
+                    <div class="card-title">
+                        <span class="card-icon">😴</span>
+                        Sleep Check-in
+                    </div>
+                    <p style="margin-bottom: 15px; color: var(--text-secondary);">How many hours did you sleep last night?</p>
+                    <div class="sleep-input-container">
+                        <input type="number" class="sleep-input" id="sleepHours" min="0" max="24" step="0.5" placeholder="0">
+                        <span class="sleep-label">hours</span>
+                    </div>
+                    <button class="btn btn-primary" onclick="logSleep()">Log Sleep</button>
+                    <div id="sleepFeedback" style="margin-top: 15px; text-align: center; display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Daily Tasks -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="step-label">Step 2</span>
+                </div>
+                <div class="card-body">
+                    <div class="card-title">
+                        <span class="card-icon">✅</span>
+                        Daily Routine
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 15px;">Check off what you completed</p>
+                    <div class="task-list" id="dailyTasks">
+                        <!-- Tasks will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Tasks (Gated) -->
+            <div class="card" id="businessTasksCard">
+                <div class="card-header">
+                    <span class="step-label">Step 3</span>
+                </div>
+                <div class="card-body">
+                    <div class="card-title">
+                        <span class="card-icon">💼</span>
+                        Business Tasks
+                    </div>
+                    <div id="businessGate" class="gate-message">
+                        <div class="gate-icon">🔒</div>
+                        <div class="gate-text">Complete your daily routine first.<br>Your business will be here when you're ready.</div>
+                    </div>
+                    <div id="businessTasks" class="task-list hidden">
+                        <div class="task-item" data-task="business-1">
+                            <div class="checkbox"><span class="checkmark">✓</span></div>
+                            <span class="task-icon">📧</span>
+                            <span class="task-text">Check emails</span>
+                        </div>
+                        <div class="task-item" data-task="business-2">
+                            <div class="checkbox"><span class="checkmark">✓</span></div>
+                            <span class="task-icon">📝</span>
+                            <span class="task-text">Content creation</span>
+                        </div>
+                        <div class="task-item" data-task="business-3">
+                            <div class="checkbox"><span class="checkmark">✓</span></div>
+                            <span class="task-icon">📱</span>
+                            <span class="task-text">Social media engagement</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Self-Care Check-in -->
+            <div class="card hidden" id="selfCareCard">
+                <div class="card-body">
+                    <div class="card-title">
+                        <span class="card-icon">💜</span>
+                        Evening Self-Care Check-in
+                    </div>
+                    <div id="selfCareContent">
+                        <!-- Content populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bedtime Reminder Setup -->
+            <div class="card" id="bedtimeCard">
+                <div class="card-header">
+                    <span class="step-label">Step 4</span>
+                </div>
+                <div class="card-body">
+                    <div class="card-title">
+                        <span class="card-icon">🌙</span>
+                        Bedtime Planner
+                    </div>
+                    <p style="margin-bottom: 15px; color: var(--text-secondary);">What time do you need to wake up tomorrow?</p>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; margin-bottom: 15px;">
+                        <input type="time" id="wakeTime" value="07:00">
+                    </div>
+                    <button class="btn btn-outline" onclick="calculateBedtime()">Calculate Bedtime</button>
+                    <div id="bedtimeSuggestion" style="margin-top: 15px; text-align: center; display: none;">
+                        <p style="font-weight: 600; color: var(--purple);">For 7 hours of sleep, go to bed by:</p>
+                        <p style="font-size: 2rem; font-weight: 800; color: var(--purple);" id="suggestedBedtime">10:00 PM</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Workout Section -->
+        <section class="section" id="workout">
+            <!-- Mode Selection -->
+            <div id="workoutModeSelect">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="card-title" style="justify-content: center;">
+                            Today's Workout
+                        </div>
+                        <!-- Divider -->
+                        <div style="height: 1px; background: linear-gradient(to right, transparent, #4A5568, transparent); margin: 10px 0 15px;"></div>
+                        <p style="text-align: center; color: var(--text-secondary); margin-bottom: 10px;" id="workoutDay">
+                            <!-- Will be set by JavaScript -->
+                        </p>
+                        <p style="text-align: center; font-weight: 700; font-size: 1.3rem; margin-bottom: 20px; color: var(--purple);" id="workoutMuscle">
+                            <!-- Will be set by JavaScript -->
+                        </p>
+
+                        <!-- Encouraging Message -->
+                        <div style="background: linear-gradient(135deg, #A78BFA 0%, #E88FC3 100%); border-radius: 15px; padding: 15px; margin-bottom: 20px;">
+                            <p style="text-align: center; color: white; font-size: 0.95rem; margin: 0; font-weight: 600;">
+                                Remember Teshia, the hardest part is starting. You've already won by showing up.
+                            </p>
+                        </div>
+
+                        <!-- Schedule Reminder -->
+                        <div style="background: var(--bg-secondary); border-radius: 10px; padding: 12px; margin-bottom: 20px;">
+                            <p style="text-align: center; color: var(--text-secondary); font-size: 0.85rem; margin: 0;">
+                                <strong>Your schedule:</strong> Mon (Glutes/Legs) • Wed (Abs/Core) • Fri (Arms/Upper)
+                            </p>
+                        </div>
+
+                        <div class="mode-selection">
+                            <div class="mode-btn" data-mode="home" onclick="selectMode('home')">
+                                <div class="mode-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div>
+                                <div class="mode-label">Home</div>
+                                <div class="mode-desc">No jumping • Bodyweight only</div>
+                            </div>
+                            <div class="mode-btn" data-mode="gym" onclick="selectMode('gym')">
+                                <div class="mode-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43L16.29 22l2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29z"/></svg></div>
+                                <div class="mode-label">Gym</div>
+                                <div class="mode-desc">Full equipment available</div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" onclick="startWorkout()" id="startWorkoutBtn" disabled style="margin-top: 20px;">
+                            Start 20-Minute Workout
+                        </button>
+                        <div style="margin-top: 15px;">
+                            <label style="display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer;">
+                                <input type="checkbox" id="extendedWorkout" style="width: 20px; height: 20px; accent-color: var(--purple);">
+                                <span style="color: var(--text-secondary);">Unlock 30-minute workout</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Workout Level -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="card-title">
+                            <span class="card-icon">⭐</span>
+                            Your Level
+                            <span class="level-up-badge" id="levelBadge">Beginner</span>
+                        </div>
+                        <div class="workout-progress">
+                            <div class="workout-progress-bar">
+                                <div class="workout-progress-fill" id="levelProgress" style="width: 10%;"></div>
+                            </div>
+                            <div class="workout-progress-text" id="levelProgressText">1/10</div>
+                        </div>
+                        <p style="text-align: center; color: var(--text-secondary); font-size: 0.9rem;">
+                            Complete 10 workouts to reach Intermediate level!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Workout -->
+            <div id="activeWorkout" class="hidden">
+                <!-- Stretch Step -->
+                <div id="stretchStep" style="margin-bottom: 15px;">
+                    <div style="background: #F0FDF4; border: 2px solid #86EFAC; border-radius: 15px; padding: 20px;">
+                        <p style="text-align: center; font-weight: 700; color: #166534; margin-bottom: 15px;">Before you begin:</p>
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+                            <div id="stretchCheckbox" onclick="completeStretch()" style="width: 30px; height: 30px; border: 3px solid #22C55E; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s;">
+                                <span id="stretchCheckmark" style="color: white; font-weight: bold; display: none;">✓</span>
+                            </div>
+                            <span style="color: #166534; font-weight: 600;">60 seconds of stretching</span>
+                        </div>
+                        <p id="stretchStatus" style="text-align: center; color: #166534; font-size: 0.85rem; margin-top: 10px; opacity: 0.8;">Tap the circle when complete</p>
+                    </div>
+                </div>
+
+                <!-- Workout Header -->
+                <div class="card" style="margin-bottom: 15px;">
+                    <div class="card-body">
+                        <div style="text-align: center;">
+                            <h2 style="font-family: 'Montserrat', sans-serif; color: var(--purple); margin-bottom: 5px;" id="workoutTitle">Today's Workout</h2>
+                            <p style="color: var(--text-secondary);" id="workoutSubtitle">5 exercises • ~20 minutes</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exercise List with Sets -->
+                <div class="workout-list" id="workoutExerciseList">
+                    <!-- Exercises will be populated by JavaScript -->
+                </div>
+
+                <!-- Sticky Summary Bar -->
+                <div class="workout-summary-bar">
+                    <div class="summary-progress">
+                        <div class="summary-progress-bar">
+                            <div class="summary-progress-fill" id="setsProgressBar" style="width: 0%;"></div>
+                        </div>
+                        <div class="summary-text" id="setsProgressText">0/15 sets</div>
+                    </div>
+                    <button class="btn btn-success" id="completeWorkoutBtn" onclick="completeWorkout()" disabled>
+                        Complete All Sets to Finish 💪
+                    </button>
+                </div>
+            </div>
+
+            <!-- Workout Complete -->
+            <div id="workoutComplete" class="hidden">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="workout-complete">
+                            <div class="complete-icon">🎉</div>
+                            <div class="complete-title">WORKOUT COMPLETE!</div>
+                            <div class="complete-affirmation" id="completeAffirmation">
+                                You showed up for yourself today. That's everything.
+                            </div>
+                            <div class="complete-stats">
+                                <div class="stat">
+                                    <div class="stat-value" id="workoutMinutes">20</div>
+                                    <div class="stat-label">Minutes</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="stat-value" id="workoutExercises">6</div>
+                                    <div class="stat-label">Exercises</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="stat-value" id="workoutStreak">1</div>
+                                    <div class="stat-label">Day Streak</div>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" onclick="finishWorkout()">
+                                Back to Dashboard 💜
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scriptures Section -->
+        <section class="section" id="scriptures">
+            <div class="card">
+                <div class="card-body">
+                    <div class="card-title">
+                        <span class="card-icon">📖</span>
+                        Scripture Library
+                    </div>
+                    <div class="scripture-categories">
+                        <button class="scripture-cat-btn active" data-category="strength" onclick="filterScriptures('strength')">Strength</button>
+                        <button class="scripture-cat-btn" data-category="peace" onclick="filterScriptures('peace')">Peace</button>
+                        <button class="scripture-cat-btn" data-category="motivation" onclick="filterScriptures('motivation')">Motivation</button>
+                        <button class="scripture-cat-btn" data-category="gratitude" onclick="filterScriptures('gratitude')">Gratitude</button>
+                    </div>
+                    <div id="scriptureList">
+                        <!-- Scriptures will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Progress Section -->
+        <section class="section" id="progress">
+            <!-- Weekly Summary -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="weekly-summary">
+                        <h3>This Week's Progress</h3>
+                        <div class="weekly-days" id="weeklyDays">
+                            <!-- Days will be populated by JavaScript -->
+                        </div>
+                        <p id="weeklySummaryText">You're building momentum!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Badges -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="card-title">
+                        <span class="card-icon">🏆</span>
+                        Your Badges
+                    </div>
+                    <div class="badges-grid" id="badgesGrid">
+                        <!-- Badges will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="card-title">
+                        <span class="card-icon">📈</span>
+                        Your Stats
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div style="text-align: center; padding: 20px; background: #F7FAFC; border-radius: 15px;">
+                            <div style="font-size: 2rem; font-weight: 800; color: var(--purple);" id="totalWorkouts">0</div>
+                            <div style="font-size: 0.9rem; color: var(--text-secondary);">Total Workouts</div>
+                        </div>
+                        <div style="text-align: center; padding: 20px; background: #F7FAFC; border-radius: 15px;">
+                            <div style="font-size: 2rem; font-weight: 800; color: var(--gold);" id="totalPrayers">0</div>
+                            <div style="font-size: 0.9rem; color: var(--text-secondary);">Prayer Days</div>
+                        </div>
+                        <div style="text-align: center; padding: 20px; background: #F7FAFC; border-radius: 15px;">
+                            <div style="font-size: 2rem; font-weight: 800; color: var(--green-dark);" id="avgSleep">0</div>
+                            <div style="font-size: 0.9rem; color: var(--text-secondary);">Avg Sleep (hrs)</div>
+                        </div>
+                        <div style="text-align: center; padding: 20px; background: #F7FAFC; border-radius: 15px;">
+                            <div style="font-size: 2rem; font-weight: 800; color: var(--pink-dark);" id="longestStreak">0</div>
+                            <div style="font-size: 0.9rem; color: var(--text-secondary);">Longest Streak</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sleep Trend -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="card-title">
+                        <span class="card-icon">😴</span>
+                        Sleep This Week
+                    </div>
+                    <div id="sleepChart" style="display: flex; align-items: flex-end; justify-content: space-between; height: 150px; padding: 20px 10px;">
+                        <!-- Sleep bars will be populated -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // ============================================
+        // DATA STRUCTURES
+        // ============================================
+
+        const QUOTES = [
+            { text: "She is clothed with strength and dignity, and she laughs without fear of the future.", source: "Proverbs 31:25" },
+            { text: "I can do all things through Christ who strengthens me.", source: "Philippians 4:13" },
+            { text: "For God has not given us a spirit of fear, but of power and of love and of a sound mind.", source: "2 Timothy 1:7" },
+            { text: "You are stronger than you think. More capable than you know. Braver than you believe.", source: "Daily Affirmation" },
+            { text: "Progress, not perfection. Every step forward matters.", source: "Daily Affirmation" },
+            { text: "The Lord is my strength and my shield; my heart trusts in him, and he helps me.", source: "Psalm 28:7" },
+            { text: "Your body is a temple. Treat it with love and it will love you back.", source: "Daily Affirmation" },
+            { text: "Be strong and courageous. Do not be afraid; do not be discouraged.", source: "Joshua 1:9" },
+            { text: "Small consistent actions lead to extraordinary results.", source: "Daily Affirmation" },
+            { text: "The steadfast love of the Lord never ceases; his mercies never come to an end.", source: "Lamentations 3:22-23" },
+            { text: "You didn't come this far to only come this far. Keep going.", source: "Daily Affirmation" },
+            { text: "Trust in the Lord with all your heart and lean not on your own understanding.", source: "Proverbs 3:5" },
+            { text: "Today is a new opportunity to become a better version of yourself.", source: "Daily Affirmation" },
+            { text: "Casting all your care upon him; for he careth for you.", source: "1 Peter 5:7 KJV" }
+        ];
+
+        const SCRIPTURES = {
+            strength: [
+                { text: "The LORD is my light and my salvation; whom shall I fear? the LORD is the strength of my life; of whom shall I be afraid?", ref: "Psalm 27:1 KJV" },
+                { text: "But they that wait upon the LORD shall renew their strength; they shall mount up with wings as eagles; they shall run, and not be weary; and they shall walk, and not faint.", ref: "Isaiah 40:31 KJV" },
+                { text: "I can do all things through Christ which strengtheneth me.", ref: "Philippians 4:13 KJV" },
+                { text: "The LORD is my strength and song, and he is become my salvation: he is my God, and I will prepare him an habitation; my father's God, and I will exalt him.", ref: "Exodus 15:2 KJV" },
+                { text: "Be of good courage, and he shall strengthen your heart, all ye that hope in the LORD.", ref: "Psalm 31:24 KJV" }
+            ],
+            peace: [
+                { text: "Peace I leave with you, my peace I give unto you: not as the world giveth, give I unto you. Let not your heart be troubled, neither let it be afraid.", ref: "John 14:27 KJV" },
+                { text: "Casting all your care upon him; for he careth for you.", ref: "1 Peter 5:7 KJV" },
+                { text: "The LORD will give strength unto his people; the LORD will bless his people with peace.", ref: "Psalm 29:11 KJV" },
+                { text: "Thou wilt keep him in perfect peace, whose mind is stayed on thee: because he trusteth in thee.", ref: "Isaiah 26:3 KJV" },
+                { text: "Be careful for nothing; but in every thing by prayer and supplication with thanksgiving let your requests be made known unto God.", ref: "Philippians 4:6 KJV" }
+            ],
+            motivation: [
+                { text: "For I know the thoughts that I think toward you, saith the LORD, thoughts of peace, and not of evil, to give you an expected end.", ref: "Jeremiah 29:11 KJV" },
+                { text: "Commit thy works unto the LORD, and thy thoughts shall be established.", ref: "Proverbs 16:3 KJV" },
+                { text: "And whatsoever ye do, do it heartily, as to the Lord, and not unto men.", ref: "Colossians 3:23 KJV" },
+                { text: "And let us not be weary in well doing: for in due season we shall reap, if we faint not.", ref: "Galatians 6:9 KJV" },
+                { text: "Being confident of this very thing, that he which hath begun a good work in you will perform it until the day of Jesus Christ.", ref: "Philippians 1:6 KJV" }
+            ],
+            gratitude: [
+                { text: "In every thing give thanks: for this is the will of God in Christ Jesus concerning you.", ref: "1 Thessalonians 5:18 KJV" },
+                { text: "Every good gift and every perfect gift is from above, and cometh down from the Father of lights, with whom is no variableness, neither shadow of turning.", ref: "James 1:17 KJV" },
+                { text: "Enter into his gates with thanksgiving, and into his courts with praise: be thankful unto him, and bless his name.", ref: "Psalm 100:4 KJV" },
+                { text: "The LORD hath done great things for us; whereof we are glad.", ref: "Psalm 126:3 KJV" },
+                { text: "I will praise thee, O LORD, with my whole heart; I will shew forth all thy marvellous works.", ref: "Psalm 9:1 KJV" }
+            ]
+        };
+
+        const REST_MESSAGES = [
+            "Breathe. You're doing amazing. 💜",
+            "Rest is part of the workout. Embrace it.",
+            "You're stronger than you were yesterday.",
+            "Feel your heart beating? That's power.",
+            "Almost there. You've got this!",
+            "This rest is making you stronger.",
+            "Proud of you for showing up today.",
+            "Take this moment. You've earned it.",
+            "Your body is thanking you right now.",
+            "Strength isn't just physical. It's showing up."
+        ];
+
+        const WORKOUT_COMPLETE_AFFIRMATIONS = [
+            "You showed up for yourself today. That's everything.",
+            "Look at you, crushing goals! So proud of you.",
+            "Your future self is thanking you right now.",
+            "Consistency is your superpower. You proved that today.",
+            "You didn't just work out—you invested in yourself.",
+            "Strong body, strong mind, strong spirit. That's you!",
+            "Every rep brought you closer to your goals.",
+            "You chose yourself today. That's beautiful."
+        ];
+
+        // Exercise Library - Sets & Reps Structure (5 exercises × 3 sets ≈ 20 min)
+        const EXERCISES = {
+            home: {
+                glutes_legs: [
+                    {
+                        name: "Glute Bridges",
+                        muscle: "Glutes & Hamstrings",
+                        sets: 3,
+                        reps: "15 reps",
+                        isHold: false,
+                        form: "Lie on your back, knees bent, feet flat. Push through heels to lift hips. Squeeze glutes at the top. Lower slowly.",
+                        illustration: "bridge"
+                    },
+                    {
+                        name: "Bodyweight Squats",
+                        muscle: "Quads, Glutes & Hamstrings",
+                        sets: 3,
+                        reps: "12 reps",
+                        isHold: false,
+                        form: "Stand feet shoulder-width apart. Lower like sitting in a chair. Keep chest up, knees over toes. Push through heels to stand.",
+                        illustration: "squat"
+                    },
+                    {
+                        name: "Donkey Kicks",
+                        muscle: "Glutes",
+                        sets: 3,
+                        reps: "10 each leg",
+                        isHold: false,
+                        form: "On all fours, keep core tight. Lift one leg back, knee bent 90°. Squeeze glute at top. Lower with control.",
+                        illustration: "donkey"
+                    },
+                    {
+                        name: "Scissor Kicks",
+                        muscle: "Glutes & Hip Abductors",
+                        sets: 3,
+                        reps: "10 each leg",
+                        isHold: false,
+                        form: "On all fours, keep core tight. Lift knee out to side, keeping 90° bend. Lower with control. Keep hips stable.",
+                        illustration: "hydrant"
+                    },
+                    {
+                        name: "Stationary Lunges",
+                        muscle: "Quads, Glutes & Hamstrings",
+                        sets: 3,
+                        reps: "10 each leg",
+                        isHold: false,
+                        form: "Step one foot forward into lunge position. Lower until both knees at 90°. Push through front heel to stand. Keep core tight.",
+                        illustration: "lunge"
+                    },
+                    {
+                        name: "Wall Sit",
+                        muscle: "Quads & Glutes",
+                        sets: 3,
+                        reps: "30 seconds",
+                        isHold: true,
+                        form: "Back flat against wall, slide down until thighs parallel to floor. Hold position, breathe steadily.",
+                        illustration: "wallsit"
+                    }
+                ],
+                abs_core: [
+                    {
+                        name: "Bicycle Crunches",
+                        muscle: "Obliques & Abs",
+                        sets: 3,
+                        reps: "20 total",
+                        isHold: false,
+                        form: "Lie on back, hands behind head. Bring knee to opposite elbow, alternating. Twist through core, not neck.",
+                        illustration: "bicycle"
+                    },
+                    {
+                        name: "Plank",
+                        muscle: "Full Core",
+                        sets: 3,
+                        reps: "30 seconds",
+                        isHold: true,
+                        form: "Forearms on ground, body straight from head to heels. Engage core, don't let hips sag. Breathe steadily.",
+                        illustration: "plank"
+                    },
+                    {
+                        name: "Mountain Climbers (Slow)",
+                        muscle: "Core & Hip Flexors",
+                        sets: 3,
+                        reps: "20 total",
+                        isHold: false,
+                        form: "Plank position. Bring one knee to chest slowly, switch. Keep hips down, core engaged. Move with control, no jumping.",
+                        illustration: "mountainclimber"
+                    },
+                    {
+                        name: "Side Plank",
+                        muscle: "Obliques",
+                        sets: 2,
+                        reps: "20 sec each side",
+                        isHold: true,
+                        form: "On side, prop on forearm. Lift hips, body in straight line. Hold, then switch sides. Keep core tight.",
+                        illustration: "sideplank"
+                    },
+                    {
+                        name: "Russian Twists",
+                        muscle: "Obliques",
+                        sets: 3,
+                        reps: "20 total",
+                        isHold: false,
+                        form: "Sit, knees bent, lean back slightly. Twist side to side. Keep feet grounded (or lifted for challenge).",
+                        illustration: "russiantwist"
+                    },
+                    {
+                        name: "Leg Raises",
+                        muscle: "Lower Abs",
+                        sets: 3,
+                        reps: "12 reps",
+                        isHold: false,
+                        form: "Lie on back, legs straight up. Lower legs slowly toward floor without arching back. Raise back up with control.",
+                        illustration: "leglift"
+                    }
+                ],
+                arms_upper: [
+                    {
+                        name: "Push-ups (Knee Modified)",
+                        muscle: "Chest, Triceps & Shoulders",
+                        sets: 3,
+                        reps: "10 reps",
+                        isHold: false,
+                        form: "Knees on ground, hands shoulder-width. Lower chest to floor, elbows at 45°. Push up fully. Keep core tight.",
+                        illustration: "pushup"
+                    },
+                    {
+                        name: "Tricep Dips (Chair)",
+                        muscle: "Triceps",
+                        sets: 3,
+                        reps: "10 reps",
+                        isHold: false,
+                        form: "Hands on chair edge, legs out. Lower body by bending elbows to 90°. Push up. Keep back close to chair.",
+                        illustration: "tricdip"
+                    },
+                    {
+                        name: "Arm Circles",
+                        muscle: "Shoulders",
+                        sets: 2,
+                        reps: "30 sec each direction",
+                        isHold: true,
+                        form: "Arms out to sides at shoulder height. Make small circles, gradually larger. Reverse direction. Keep shoulders down.",
+                        illustration: "armcircle"
+                    },
+                    {
+                        name: "Plank Shoulder Taps",
+                        muscle: "Core & Shoulders",
+                        sets: 3,
+                        reps: "16 total",
+                        isHold: false,
+                        form: "High plank position. Tap left shoulder with right hand, then switch. Minimize hip rotation. Move with control.",
+                        illustration: "shouldertap"
+                    },
+                    {
+                        name: "Superman Hold",
+                        muscle: "Back & Shoulders",
+                        sets: 3,
+                        reps: "10 reps",
+                        isHold: false,
+                        form: "Lie face down, arms extended. Lift arms, chest, and legs simultaneously. Hold briefly, lower slowly.",
+                        illustration: "superman"
+                    },
+                    {
+                        name: "Wall Push-ups",
+                        muscle: "Chest & Triceps",
+                        sets: 3,
+                        reps: "12 reps",
+                        isHold: false,
+                        form: "Stand arm's length from wall. Place hands on wall, shoulder-width. Lower chest to wall, push back. Great for beginners.",
+                        illustration: "wallpushup"
+                    }
+                ]
+            },
+            gym: {
+                glutes_legs: [
+                    {
+                        name: "Goblet Squats",
+                        muscle: "Quads, Glutes & Core",
+                        sets: 3,
+                        reps: "12 reps",
+                        isHold: false,
+                        form: "Hold dumbbell at chest. Squat deep, elbows inside knees. Keep chest up, drive through heels to stand.",
+                        illustration: "gobletsquat"
+                    },
+                    {
+                        name: "Romanian Deadlifts",
+                        muscle: "Hamstrings & Glutes",
+                        sets: 3,
+                        reps: "12 reps",
+                        isHold: false,
+                        form: "Hold dumbbells in front of thighs. Hinge at hips, lowering weights along legs. Feel hamstring stretch, return to standing.",
+                        illustration: "rdl"
+                    },
+                    {
+                        name: "Hip Thrusts (Bench)",
+                        muscle: "Glutes",
+                        sets: 3,
+                        reps: "15 reps",
+                        isHold: false,
+                        form: "Upper back on bench, feet flat on floor. Drive through heels, thrust hips up. Squeeze glutes at top. Lower with control.",
+                        illustration: "hipthrust"
+                    },
+                    {
+                        name: "Walking Lunges",
+                        muscle: "Quads, Glutes & Hamstrings",
+                        sets: 3,
+                        reps: "10 each leg",
+                        isHold: false,
+                        form: "Step forward into lunge, both knees at 90°. Push through front heel, step forward with back leg. Continue walking.",
+                        illustration: "walkinglunge"
+                    },
+                    {
+                        name: "Leg Curl Machine",
+                        muscle: "Hamstrings",
+                        sets: 3,
+                        reps: "12 reps",
+                        isHold: false,
+                        form: "Lie face down, pad behind ankles. Curl weight toward glutes. Lower slowly. Don't lift hips.",
+                        illustration: "legcurl"
+                    },
+                    {
+                        name: "Sumo Squats",
+                        muscle: "Inner Thighs & Glutes",
+                        sets: 3,
+                        reps: "12 reps",
+                        isHold: false,
+                        form: "Wide stance, toes pointed out. Hold dumbbell between legs. Squat deep, keep knees over toes. Drive up through heels.",
+                        illustration: "sumosquat"
+                    }
+                ],
+                abs_core: [
+                    {
+                        name: "Cable Crunches",
+                        muscle: "Abs",
+                        sets: 3,
+                        reps: "15 reps",
+                        isHold: false,
+                        form: "Kneel at cable, rope behind head. Crunch down, bringing elbows to thighs. Return with control. Feel abs working.",
+                        illustration: "cablecrunch"
+                    },
+                    {
+                        name: "Hanging Knee Raises",
+                        muscle: "Lower Abs",
+                        sets: 3,
+                        reps: "10 reps",
+                        isHold: false,
+                        form: "Hang from bar, arms extended. Raise knees to chest, curling pelvis. Lower with control. Minimize swinging.",
+                        illustration: "hangingknee"
+                    },
+                    {
+                        name: "Weighted Plank",
+                        muscle: "Full Core",
+                        sets: 3,
+                        reps: "30 seconds",
+                        isHold: true,
+                        form: "Plank position with weight plate on back. Keep body straight, engage core. Breathe steadily.",
+                        illustration: "weightedplank"
+                    },
+                    {
+                        name: "Russian Twists",
+                        muscle: "Obliques",
+                        sets: 3,
+                        reps: "20 total",
+                        isHold: false,
+                        form: "Sit, knees bent, lean back slightly. Hold weight, twist side to side. Keep feet grounded (or lifted for challenge).",
+                        illustration: "russiantwist"
+                    },
+                    {
+                        name: "Cable Woodchops",
+                        muscle: "Obliques & Core",
+                        sets: 3,
+                        reps: "10 each side",
+                        isHold: false,
+                        form: "Stand sideways to high cable. Pull diagonally across body to opposite hip. Rotate through core. Control the return.",
+                        illustration: "woodchop"
+                    },
+                    {
+                        name: "Decline Sit-ups",
+                        muscle: "Upper Abs",
+                        sets: 3,
+                        reps: "12 reps",
+                        isHold: false,
+                        form: "Lock feet on decline bench. Cross arms on chest. Lower back slowly, sit up fully. Don't use momentum.",
+                        illustration: "declinesitup"
+                    }
+                ],
+                arms_upper: [
+                    {
+                        name: "Dumbbell Shoulder Press",
+                        muscle: "Shoulders",
+                        sets: 3,
+                        reps: "12 reps",
+                        isHold: false,
+                        form: "Sit or stand, dumbbells at shoulders. Press overhead until arms straight. Lower with control. Keep core tight.",
+                        illustration: "shoulderpress"
+                    },
+                    {
+                        name: "Bicep Curls",
+                        muscle: "Biceps",
+                        sets: 3,
+                        reps: "12 reps",
+                        isHold: false,
+                        form: "Stand with dumbbells, palms forward. Curl weights to shoulders. Lower slowly. Don't swing. Keep elbows at sides.",
+                        illustration: "bicepcurl"
+                    },
+                    {
+                        name: "Tricep Pushdowns",
+                        muscle: "Triceps",
+                        sets: 3,
+                        reps: "12 reps",
+                        isHold: false,
+                        form: "Stand at cable, grip rope or bar. Push down until arms straight. Squeeze triceps. Return with control.",
+                        illustration: "triceppushdown"
+                    },
+                    {
+                        name: "Lat Pulldowns",
+                        muscle: "Back & Biceps",
+                        sets: 3,
+                        reps: "12 reps",
+                        isHold: false,
+                        form: "Grip bar wider than shoulders. Pull to upper chest, squeezing shoulder blades. Extend arms with control.",
+                        illustration: "latpulldown"
+                    },
+                    {
+                        name: "Dumbbell Rows",
+                        muscle: "Back & Biceps",
+                        sets: 3,
+                        reps: "10 each arm",
+                        isHold: false,
+                        form: "One hand and knee on bench. Row dumbbell to hip, elbow high. Lower with control. Keep back flat.",
+                        illustration: "dbrow"
+                    },
+                    {
+                        name: "Lateral Raises",
+                        muscle: "Shoulders",
+                        sets: 3,
+                        reps: "12 reps",
+                        isHold: false,
+                        form: "Stand with dumbbells at sides. Raise arms to shoulder height, slight elbow bend. Lower slowly. Don't swing.",
+                        illustration: "lateralraise"
+                    }
+                ]
+            }
+        };
+
+        // Exercise Images - Local custom images
+        const EXERCISE_IMAGES = {
+            // Home - Glutes & Legs
+            bridge: "images/Glute-bridges.png",
+            squat: "images/squats.png",
+            donkey: "images/donkey-kicks.png",
+            hydrant: "images/scissor.kicks.png",  // Using scissor kicks image
+            leglift: "images/leg-raises.png",
+            lunge: "images/lunges.png",
+            clamshell: "images/leg-raises.png",
+            wallsit: "images/wall sits.png",
+
+            // Home - Abs & Core
+            deadbug: "images/leg-raises.png",
+            bicycle: "images/bicycle-crunches.png",
+            plank: "images/plank.png",
+            birddog: "images/inchworms.png",
+            reversecrunch: "images/bicycle-crunches.png",
+            sideplank: "images/side-plank.png",
+            mountainclimber: "images/mountain-climbers.png",
+            toetouch: "images/leg-raises.png",
+
+            // Home - Arms & Upper
+            pushup: "images/push-ups.jpeg",
+            tricdip: "images/tricep-dips.png",
+            armcircle: "images/arm-circles.png",
+            diamondpushup: "images/push-ups.jpeg",
+            shouldertap: "images/plank-shoulder-taps.png",
+            superman: "images/superman-hold.png",
+            wallpushup: "images/wall-push-ups.png",
+            yraise: "images/superman-hold.png",
+
+            // Gym - Glutes & Legs
+            gobletsquat: "images/squats.png",
+            rdl: "images/single-leg-deadlifts.png",
+            hipthrust: "images/Glute-bridges.png",
+            legpress: "images/squats.png",
+            walkinglunge: "images/lunges.png",
+            cablekickback: "images/donkey-kicks.png",
+            legcurl: "images/leg-raises.png",
+            sumosquat: "images/squats.png",
+
+            // Gym - Abs & Core
+            cablecrunch: "images/bicycle-crunches.png",
+            hangingknee: "images/leg-raises.png",
+            abwheel: "images/plank.png",
+            weightedplank: "images/plank.png",
+            russiantwist: "images/russian-twists.png",
+            woodchop: "images/russian-twists.png",
+            declinesitup: "images/bicycle-crunches.png",
+            pallofpress: "images/plank.png",
+
+            // Gym - Arms & Upper
+            shoulderpress: "images/arm-circles.png",
+            bicepcurl: "images/arm-circles.png",
+            triceppushdown: "images/tricep-dips.png",
+            latpulldown: "images/arm-circles.png",
+            dbrow: "images/single-leg-deadlifts.png",
+            lateralraise: "images/arm-circles.png",
+            facepull: "images/arm-circles.png",
+            chestpress: "images/push-ups.jpeg",
+
+            // Default fallback
+            default: "images/plank.png"
+        };
+
+        const BADGES = [
+            { id: 'warrior', name: '3-Day Warrior', icon: '⚔️', description: '3 workouts in a week', check: (data) => data.weeklyWorkouts >= 3 },
+            { id: 'prayer', name: 'Prayer Streak', icon: '🙏', description: '7 days of prayer', check: (data) => data.prayerStreak >= 7 },
+            { id: 'queen', name: 'Consistency Queen', icon: '👑', description: '14 days checking in', check: (data) => data.totalDays >= 14 },
+            { id: 'sleeper', name: 'Well Rested', icon: '😴', description: '7 days of 6+ hrs sleep', check: (data) => data.sleepStreak >= 7 },
+            { id: 'writer', name: 'Journal Master', icon: '📝', description: '10 journal entries', check: (data) => data.journalDays >= 10 },
+            { id: 'starter', name: 'First Steps', icon: '👟', description: 'Complete first workout', check: (data) => data.totalWorkouts >= 1 },
+            { id: 'dedicated', name: 'Dedicated', icon: '💎', description: '20 total workouts', check: (data) => data.totalWorkouts >= 20 },
+            { id: 'mindful', name: 'Mindful Soul', icon: '🧘', description: '5 meditation sessions', check: (data) => data.meditationDays >= 5 },
+            { id: 'strength', name: 'Strength Builder', icon: '💪', description: 'Reach Intermediate level', check: (data) => data.level >= 2 }
+        ];
+
+        // ============================================
+        // STATE MANAGEMENT
+        // ============================================
+
+        let state = {
+            currentStreak: 0,
+            longestStreak: 0,
+            totalWorkouts: 0,
+            totalPrayers: 0,
+            weeklyWorkouts: 0,
+            prayerStreak: 0,
+            sleepStreak: 0,
+            journalDays: 0,
+            meditationDays: 0,
+            totalDays: 0,
+            level: 1, // 1 = Beginner, 2 = Intermediate, 3 = Advanced
+            workoutsToNextLevel: 10,
+            todaysTasks: {},
+            sleepLog: [],
+            weekProgress: [false, false, false, false, false, false, false],
+            lastCheckIn: null,
+            badges: [],
+            selfCareResponses: [],
+            lastMoodCheckin: null,
+            lastMood: null
+        };
+
+        let workoutState = {
+            mode: null,
+            exercises: [],
+            workoutDuration: 20,
+            totalSets: 0,
+            completedSets: 0,
+            setStatus: {}
+        };
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+
+        function init() {
+            loadState();
+            updateDate();
+            displayQuote();
+            setupNavigation();
+            populateDailyTasks();
+            updateProgress();
+            updateStreakDisplay();
+            updateWorkoutInfo();
+            populateScriptures('strength');
+            populateBadges();
+            updateStats();
+            updateWeeklyProgress();
+            updateSleepChart();
+            checkForReminders();
+
+            // Show mood check-in on app load (first thing of the day)
+            setTimeout(() => {
+                showMoodCheckin();
+            }, 500);
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem('teshiaDailySystem');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                state = { ...state, ...parsed };
+
+                // Check if it's a new day
+                const today = new Date().toDateString();
+                if (state.lastCheckIn !== today) {
+                    // Reset today's tasks
+                    state.todaysTasks = {};
+                    checkStreakContinuity();
+                }
+            }
+        }
+
+        function saveState() {
+            state.lastCheckIn = new Date().toDateString();
+            localStorage.setItem('teshiaDailySystem', JSON.stringify(state));
+        }
+
+        function checkStreakContinuity() {
+            const lastDate = state.lastCheckIn ? new Date(state.lastCheckIn) : null;
+            const today = new Date();
+
+            if (lastDate) {
+                const diffDays = Math.floor((today - lastDate) / (1000 * 60 * 60 * 24));
+                if (diffDays > 1) {
+                    state.currentStreak = 0;
+                }
+            }
+        }
+
+        // ============================================
+        // UI UPDATES
+        // ============================================
+
+        function updateDate() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', options);
+        }
+
+        function displayQuote() {
+            const quote = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+            document.getElementById('dailyQuote').textContent = `"${quote.text}"`;
+            document.getElementById('quoteSource').textContent = `— ${quote.source}`;
+        }
+
+        function toggleMenu() {
+            document.getElementById('hamburgerBtn').classList.toggle('open');
+            document.getElementById('navMenu').classList.toggle('open');
+            document.getElementById('navOverlay').classList.toggle('open');
+        }
+
+        function navigateTo(section) {
+            // Update nav buttons
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`[data-section="${section}"]`).classList.add('active');
+
+            // Update sections
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(section).classList.add('active');
+
+            // Close menu
+            toggleMenu();
+        }
+
+        function setupNavigation() {
+            // Navigation is now handled by onclick handlers in the HTML
+            // This function is kept for initialization if needed
+        }
+
+        function updateStreakDisplay() {
+            document.getElementById('streakCount').textContent = state.currentStreak;
+        }
+
+        function updateProgress() {
+            const tasks = document.querySelectorAll('#dailyTasks .task-item');
+            const completed = document.querySelectorAll('#dailyTasks .task-item.completed').length;
+            const total = tasks.length;
+
+            const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+            const circumference = 408.4;
+            const offset = circumference - (percent / 100) * circumference;
+
+            document.getElementById('progressCircle').style.strokeDashoffset = offset;
+            document.getElementById('progressPercent').textContent = `${percent}%`;
+
+            // Check if all daily tasks complete
+            if (percent === 100) {
+                unlockBusinessTasks();
+                showSelfCareCheckIn();
+            }
+        }
+
+        function populateDailyTasks() {
+            const container = document.getElementById('dailyTasks');
+            const dayOfWeek = new Date().getDay(); // 0 = Sunday, 1 = Monday, etc.
+
+            const tasks = [];
+
+            // Prayer/Bible reading - every day
+            tasks.push({ id: 'prayer', icon: '📖', text: 'Prayer/Bible Reading', always: true });
+
+            // Sleep - every day (but handled separately)
+            // tasks.push({ id: 'sleep', icon: '😴', text: 'Log Sleep (6+ hours goal)', always: true });
+
+            // Workout - available every day
+            tasks.push({ id: 'workout', icon: '💪', text: 'Complete Workout', workout: true });
+
+            // Journaling - Mon (1), Wed (3), Fri (5)
+            if ([1, 3, 5].includes(dayOfWeek)) {
+                tasks.push({ id: 'journal', icon: '📝', text: 'Journal Entry', workout: true });
+            }
+
+            // Speech therapy - Mon-Fri (1-5)
+            if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+                tasks.push({ id: 'speech', icon: '🗣️', text: 'Speech Therapy Log' });
+            }
+
+
+            container.innerHTML = tasks.map(task => `
+                <div class="task-item ${state.todaysTasks[task.id] ? 'completed' : ''}"
+                     data-task="${task.id}"
+                     onclick="toggleTask('${task.id}')">
+                    <div class="checkbox"><span class="checkmark">✓</span></div>
+                    <span class="task-icon">${task.icon}</span>
+                    <span class="task-text">${task.text}</span>
+                </div>
+            `).join('');
+        }
+
+        function toggleTask(taskId) {
+            // Special handling for workout task
+            if (taskId === 'workout' && !state.todaysTasks[taskId]) {
+                // Navigate to workout section
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                document.querySelector('[data-section="workout"]').classList.add('active');
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.getElementById('workout').classList.add('active');
+                return;
+            }
+
+            state.todaysTasks[taskId] = !state.todaysTasks[taskId];
+
+            // Update stats
+            if (state.todaysTasks[taskId]) {
+                if (taskId === 'prayer') {
+                    state.totalPrayers++;
+                    state.prayerStreak++;
+                }
+                if (taskId === 'journal') state.journalDays++;
+                if (taskId === 'meditation') state.meditationDays++;
+
+                // Celebrate completion
+                triggerCelebration('mini');
+            } else {
+                if (taskId === 'prayer') {
+                    state.totalPrayers = Math.max(0, state.totalPrayers - 1);
+                }
+            }
+
+            // Update UI
+            const taskEl = document.querySelector(`[data-task="${taskId}"]`);
+            if (taskEl) {
+                taskEl.classList.toggle('completed', state.todaysTasks[taskId]);
+            }
+
+            updateProgress();
+            checkDailyCompletion();
+            saveState();
+        }
+
+        function checkDailyCompletion() {
+            const tasks = document.querySelectorAll('#dailyTasks .task-item');
+            const requiredTasks = Array.from(tasks).filter(t => !t.querySelector('.task-text').textContent.includes('optional'));
+            const completedRequired = requiredTasks.filter(t => t.classList.contains('completed')).length;
+
+            if (completedRequired === requiredTasks.length && requiredTasks.length > 0) {
+                // All required tasks done!
+                state.currentStreak++;
+                state.totalDays++;
+                if (state.currentStreak > state.longestStreak) {
+                    state.longestStreak = state.currentStreak;
+                }
+
+                // Update week progress
+                const dayIndex = new Date().getDay();
+                state.weekProgress[dayIndex] = true;
+
+                updateStreakDisplay();
+                updateWeeklyProgress();
+                triggerCelebration('full');
+                showToast('🎉 All daily tasks complete! You\'re amazing!');
+            }
+        }
+
+        function unlockBusinessTasks() {
+            document.getElementById('businessGate').classList.add('hidden');
+            document.getElementById('businessTasks').classList.remove('hidden');
+        }
+
+        // ============================================
+        // WORKOUT FUNCTIONALITY
+        // ============================================
+
+        function updateWorkoutInfo() {
+            const dayOfWeek = new Date().getDay();
+            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+            document.getElementById('workoutDay').textContent = dayNames[dayOfWeek];
+
+            // Scheduled workouts on Mon/Wed/Fri, Extra workouts on other days
+            let muscleGroup;
+            if (dayOfWeek === 1) muscleGroup = 'Glutes & Legs Day';
+            else if (dayOfWeek === 3) muscleGroup = 'Abs & Core Day';
+            else if (dayOfWeek === 5) muscleGroup = 'Arms & Upper Body Day';
+            else muscleGroup = 'Extra Workout - Full Body';
+
+            document.getElementById('workoutMuscle').textContent = muscleGroup;
+
+            // Update level display
+            updateLevelDisplay();
+        }
+
+        function updateLevelDisplay() {
+            const levels = ['Beginner', 'Intermediate', 'Advanced'];
+            document.getElementById('levelBadge').textContent = levels[state.level - 1];
+
+            const workoutsInLevel = state.totalWorkouts % 10;
+            const progress = (workoutsInLevel / 10) * 100;
+            document.getElementById('levelProgress').style.width = `${Math.max(10, progress)}%`;
+            document.getElementById('levelProgressText').textContent = `${workoutsInLevel}/10`;
+        }
+
+        function selectMode(mode) {
+            workoutState.mode = mode;
+
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.toggle('selected', btn.dataset.mode === mode);
+            });
+
+            document.getElementById('startWorkoutBtn').disabled = false;
+        }
+
+        function completeStretch() {
+            // Update checkbox visual
+            document.getElementById('stretchCheckbox').style.background = '#22C55E';
+            document.getElementById('stretchCheckmark').style.display = 'block';
+            document.getElementById('stretchStatus').textContent = 'Stretch complete! Let\'s go!';
+        }
+
+        function startWorkout() {
+            if (!workoutState.mode) return;
+
+            const dayOfWeek = new Date().getDay();
+            let muscleKey;
+            let muscleTitle;
+            let isExtraWorkout = false;
+
+            // Scheduled workouts on Mon/Wed/Fri
+            if (dayOfWeek === 1) {
+                muscleKey = 'glutes_legs';
+                muscleTitle = 'Glutes & Legs';
+            } else if (dayOfWeek === 3) {
+                muscleKey = 'abs_core';
+                muscleTitle = 'Abs & Core';
+            } else if (dayOfWeek === 5) {
+                muscleKey = 'arms_upper';
+                muscleTitle = 'Arms & Upper Body';
+            } else {
+                // Extra workout day - full body
+                isExtraWorkout = true;
+                muscleTitle = 'Full Body';
+            }
+
+            workoutState.workoutDuration = document.getElementById('extendedWorkout').checked ? 30 : 20;
+            const numExercises = workoutState.workoutDuration === 20 ? 5 : 6;
+
+            if (isExtraWorkout) {
+                // Full body workout: mix exercises from all categories
+                const allGlutes = [...EXERCISES[workoutState.mode]['glutes_legs']];
+                const allAbs = [...EXERCISES[workoutState.mode]['abs_core']];
+                const allArms = [...EXERCISES[workoutState.mode]['arms_upper']];
+
+                // Shuffle each category and pick evenly
+                const shuffledGlutes = shuffleArray(allGlutes);
+                const shuffledAbs = shuffleArray(allAbs);
+                const shuffledArms = shuffleArray(allArms);
+
+                // Pick exercises from each category (2 from each for 6, or 2-2-1 for 5)
+                const exercisesPerCategory = Math.floor(numExercises / 3);
+                const remainder = numExercises % 3;
+
+                workoutState.exercises = [
+                    ...shuffledGlutes.slice(0, exercisesPerCategory + (remainder > 0 ? 1 : 0)),
+                    ...shuffledAbs.slice(0, exercisesPerCategory + (remainder > 1 ? 1 : 0)),
+                    ...shuffledArms.slice(0, exercisesPerCategory)
+                ];
+
+                // Shuffle the final list so categories are mixed
+                workoutState.exercises = shuffleArray(workoutState.exercises);
+            } else {
+                // Regular scheduled workout
+                const allExercises = EXERCISES[workoutState.mode][muscleKey];
+                workoutState.exercises = shuffleArray([...allExercises]).slice(0, numExercises);
+            }
+
+            // Calculate total sets
+            workoutState.totalSets = workoutState.exercises.reduce((sum, ex) => sum + ex.sets, 0);
+            workoutState.completedSets = 0;
+            workoutState.setStatus = {}; // Track which sets are completed
+
+            // Initialize set status for each exercise
+            workoutState.exercises.forEach((ex, exIndex) => {
+                for (let setNum = 0; setNum < ex.sets; setNum++) {
+                    workoutState.setStatus[`${exIndex}-${setNum}`] = false;
+                }
+            });
+
+            // Show workout UI
+            document.getElementById('workoutModeSelect').classList.add('hidden');
+            document.getElementById('activeWorkout').classList.remove('hidden');
+
+            // Update header
+            document.getElementById('workoutTitle').textContent = isExtraWorkout ? 'Extra Workout' : `${muscleTitle} Day`;
+            document.getElementById('workoutSubtitle').textContent =
+                `${numExercises} exercises • ${workoutState.totalSets} sets • ~${workoutState.workoutDuration} min`;
+
+            renderWorkoutList();
+            updateSetsProgress();
+        }
+
+        function renderWorkoutList() {
+            const container = document.getElementById('workoutExerciseList');
+
+            container.innerHTML = workoutState.exercises.map((exercise, exIndex) => {
+                const imageUrl = EXERCISE_IMAGES[exercise.illustration] || EXERCISE_IMAGES.default;
+
+                // Generate set checkboxes
+                let setsHtml = '';
+                for (let setNum = 0; setNum < exercise.sets; setNum++) {
+                    const setId = `${exIndex}-${setNum}`;
+                    const isChecked = workoutState.setStatus[setId];
+                    setsHtml += `
+                        <div class="set-item ${isChecked ? 'checked' : ''}"
+                             data-set-id="${setId}"
+                             onclick="toggleSet('${setId}')">
+                            <div class="set-checkbox">
+                                <span class="set-checkmark">✓</span>
+                            </div>
+                            <span class="set-label">Set ${setNum + 1}</span>
+                            <span class="set-reps">${exercise.reps}</span>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="workout-exercise-card" id="exercise-card-${exIndex}">
+                        <div class="exercise-image-container">
+                            <img src="${imageUrl}" alt="${exercise.name}" loading="lazy">
+                            <div class="exercise-image-fade"></div>
+                        </div>
+                        <div class="exercise-info" style="padding: 15px;">
+                            <h3>${exercise.name}</h3>
+                            <div class="muscle-tag">${exercise.muscle}</div>
+                            <div class="sets-reps">${exercise.sets} sets × ${exercise.reps}</div>
+                        </div>
+                        <div class="exercise-body">
+                            <div class="form-tips">
+                                <strong>Form Tips:</strong> ${exercise.form}
+                            </div>
+                            <div class="sets-checklist">
+                                ${setsHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleSet(setId) {
+            // Toggle the set status
+            workoutState.setStatus[setId] = !workoutState.setStatus[setId];
+
+            // Update the visual
+            const setElement = document.querySelector(`[data-set-id="${setId}"]`);
+            if (setElement) {
+                setElement.classList.toggle('checked', workoutState.setStatus[setId]);
+            }
+
+            // Celebrate if set completed
+            if (workoutState.setStatus[setId]) {
+                triggerCelebration('mini');
+            }
+
+            // Update progress
+            updateSetsProgress();
+
+            // Check if exercise is complete
+            const exIndex = parseInt(setId.split('-')[0]);
+            checkExerciseComplete(exIndex);
+        }
+
+        function checkExerciseComplete(exIndex) {
+            const exercise = workoutState.exercises[exIndex];
+            let allComplete = true;
+
+            for (let setNum = 0; setNum < exercise.sets; setNum++) {
+                if (!workoutState.setStatus[`${exIndex}-${setNum}`]) {
+                    allComplete = false;
+                    break;
+                }
+            }
+
+            const card = document.getElementById(`exercise-card-${exIndex}`);
+            if (card) {
+                card.classList.toggle('all-complete', allComplete);
+            }
+        }
+
+        function updateSetsProgress() {
+            // Count completed sets
+            workoutState.completedSets = Object.values(workoutState.setStatus).filter(v => v).length;
+
+            const percent = (workoutState.completedSets / workoutState.totalSets) * 100;
+
+            // Update progress bar
+            document.getElementById('setsProgressBar').style.width = `${percent}%`;
+            document.getElementById('setsProgressText').textContent =
+                `${workoutState.completedSets}/${workoutState.totalSets} sets`;
+
+            // Enable/disable complete button
+            const completeBtn = document.getElementById('completeWorkoutBtn');
+            if (workoutState.completedSets === workoutState.totalSets) {
+                completeBtn.disabled = false;
+                completeBtn.innerHTML = '🎉 Complete Workout!';
+            } else {
+                completeBtn.disabled = true;
+                const remaining = workoutState.totalSets - workoutState.completedSets;
+                completeBtn.innerHTML = `${remaining} sets remaining 💪`;
+            }
+        }
+
+        function completeWorkout() {
+            document.getElementById('activeWorkout').classList.add('hidden');
+            document.getElementById('workoutComplete').classList.remove('hidden');
+
+            // Update stats
+            state.totalWorkouts++;
+            state.weeklyWorkouts++;
+            state.todaysTasks['workout'] = true;
+
+            // Check for level up
+            if (state.totalWorkouts >= state.level * 10 && state.level < 3) {
+                state.level++;
+                showToast('🎉 LEVEL UP! You reached ' + ['Beginner', 'Intermediate', 'Advanced'][state.level - 1] + '!');
+            }
+
+            // Display completion stats
+            document.getElementById('workoutMinutes').textContent = workoutState.workoutDuration;
+            document.getElementById('workoutExercises').textContent = workoutState.exercises.length;
+            document.getElementById('workoutStreak').textContent = state.currentStreak + 1;
+
+            // Random affirmation
+            const affirmation = WORKOUT_COMPLETE_AFFIRMATIONS[Math.floor(Math.random() * WORKOUT_COMPLETE_AFFIRMATIONS.length)];
+            document.getElementById('completeAffirmation').textContent = affirmation;
+
+            triggerCelebration('full');
+            saveState();
+
+            // Update dashboard task
+            populateDailyTasks();
+            updateProgress();
+            updateLevelDisplay();
+            updateStats();
+            populateBadges();
+        }
+
+        function finishWorkout() {
+            // Reset workout state
+            workoutState = {
+                mode: null,
+                exercises: [],
+                workoutDuration: 20,
+                totalSets: 0,
+                completedSets: 0,
+                setStatus: {}
+            };
+
+            // Reset UI
+            document.getElementById('workoutComplete').classList.add('hidden');
+            document.getElementById('workoutModeSelect').classList.remove('hidden');
+            document.getElementById('workoutExerciseList').innerHTML = '';
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('selected'));
+            document.getElementById('startWorkoutBtn').disabled = true;
+
+            // Reset stretch step
+            document.getElementById('stretchStep').classList.add('hidden');
+            document.getElementById('stretchCheckbox').style.background = 'transparent';
+            document.getElementById('stretchCheckmark').style.display = 'none';
+
+            // Go back to dashboard
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('[data-section="dashboard"]').classList.add('active');
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('dashboard').classList.add('active');
+        }
+
+        // ============================================
+        // SLEEP TRACKING
+        // ============================================
+
+        function logSleep() {
+            const hours = parseFloat(document.getElementById('sleepHours').value) || 0;
+
+            if (hours <= 0) {
+                showToast('Please enter your sleep hours');
+                return;
+            }
+
+            // Log sleep
+            state.sleepLog.push({
+                date: new Date().toDateString(),
+                hours: hours
+            });
+
+            // Keep only last 7 days
+            if (state.sleepLog.length > 7) {
+                state.sleepLog = state.sleepLog.slice(-7);
+            }
+
+            // Check streak
+            if (hours >= 6) {
+                state.sleepStreak++;
+            } else {
+                state.sleepStreak = 0;
+            }
+
+            // Show feedback
+            const feedback = document.getElementById('sleepFeedback');
+            feedback.style.display = 'block';
+
+            if (hours >= 7) {
+                feedback.innerHTML = `<span style="color: var(--green-dark); font-weight: 600;">Amazing! ${hours} hours is great rest. You're taking care of yourself! 🌟</span>`;
+            } else if (hours >= 6) {
+                feedback.innerHTML = `<span style="color: var(--gold); font-weight: 600;">Good job getting ${hours} hours! You hit your goal. 😊</span>`;
+            } else {
+                feedback.innerHTML = `<span style="color: var(--coral); font-weight: 600;">${hours} hours is below your 6-hour goal. Rest is important for your strength journey. Try to get more sleep tonight. 💜</span>`;
+            }
+
+            saveState();
+            updateSleepChart();
+            updateStats();
+            populateBadges();
+
+            showToast('Sleep logged! 😴');
+        }
+
+        function calculateBedtime() {
+            const wakeTime = document.getElementById('wakeTime').value;
+            if (!wakeTime) return;
+
+            const [hours, minutes] = wakeTime.split(':').map(Number);
+
+            // Calculate bedtime for 7 hours of sleep (giving buffer)
+            let bedHour = hours - 7;
+            if (bedHour < 0) bedHour += 24;
+
+            const bedtimeStr = formatTime(bedHour, minutes);
+
+            document.getElementById('suggestedBedtime').textContent = bedtimeStr;
+            document.getElementById('bedtimeSuggestion').style.display = 'block';
+        }
+
+        function formatTime(hours, minutes) {
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const displayHour = hours % 12 || 12;
+            return `${displayHour}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+        }
+
+        function updateSleepChart() {
+            const container = document.getElementById('sleepChart');
+            const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
+            // Create bars for last 7 days
+            let html = '';
+            for (let i = 0; i < 7; i++) {
+                const entry = state.sleepLog[state.sleepLog.length - 7 + i];
+                const hours = entry ? entry.hours : 0;
+                const height = Math.min(100, (hours / 10) * 100);
+                const color = hours >= 6 ? 'var(--green)' : hours > 0 ? 'var(--gold)' : '#E2E8F0';
+
+                html += `
+                    <div style="flex: 1; text-align: center;">
+                        <div style="height: ${height}px; background: ${color}; border-radius: 5px 5px 0 0; margin: 0 5px; min-height: 5px;"></div>
+                        <div style="font-size: 0.75rem; margin-top: 5px; color: var(--text-secondary);">${days[i]}</div>
+                        <div style="font-size: 0.7rem; color: var(--text-secondary);">${hours > 0 ? hours + 'h' : '-'}</div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // ============================================
+        // SCRIPTURES
+        // ============================================
+
+        function populateScriptures(category) {
+            const scriptures = SCRIPTURES[category];
+            const container = document.getElementById('scriptureList');
+
+            container.innerHTML = scriptures.map(s => `
+                <div class="scripture-card">
+                    <div class="scripture-text">"${s.text}"</div>
+                    <div class="scripture-ref">— ${s.ref}</div>
+                </div>
+            `).join('');
+        }
+
+        function filterScriptures(category) {
+            document.querySelectorAll('.scripture-cat-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.category === category);
+            });
+            populateScriptures(category);
+        }
+
+        // ============================================
+        // SELF-CARE CHECK-IN
+        // ============================================
+
+        function showSelfCareCheckIn() {
+            const card = document.getElementById('selfCareCard');
+            card.classList.remove('hidden');
+
+            // Start check-in flow
+            showCheckInQuestion(0);
+        }
+
+        const checkInQuestions = [
+            {
+                question: "Did you take breaks today?",
+                options: ["Yes", "No"],
+                id: "breaks"
+            },
+            {
+                question: "How are you feeling right now?",
+                options: ["Energized", "Tired", "Stressed", "Peaceful"],
+                id: "feeling"
+            },
+            {
+                question: "Did you give yourself grace today?",
+                options: ["Yes", "No"],
+                id: "grace"
+            },
+            {
+                question: "What's one win from today?",
+                type: "text",
+                id: "win"
+            }
+        ];
+
+        let currentCheckInStep = 0;
+        let checkInResponses = {};
+
+        function showCheckInQuestion(step) {
+            currentCheckInStep = step;
+            const container = document.getElementById('selfCareContent');
+
+            if (step >= checkInQuestions.length) {
+                // Show completion message
+                showCheckInComplete();
+                return;
+            }
+
+            const q = checkInQuestions[step];
+
+            if (q.type === 'text') {
+                container.innerHTML = `
+                    <div class="checkin-question">
+                        <h3>${q.question}</h3>
+                        <textarea class="checkin-textarea" id="checkInText" placeholder="Type your win here..."></textarea>
+                        <button class="btn btn-primary" style="margin-top: 15px;" onclick="submitTextResponse()">Submit 💜</button>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="checkin-question">
+                        <h3>${q.question}</h3>
+                        <div class="checkin-options">
+                            ${q.options.map(opt => `
+                                <div class="checkin-option" onclick="selectCheckInOption('${q.id}', '${opt}', this)">${opt}</div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function selectCheckInOption(questionId, answer, element) {
+            checkInResponses[questionId] = answer;
+
+            // Highlight selection
+            element.classList.add('selected');
+
+            // Move to next question after brief delay
+            setTimeout(() => {
+                showCheckInQuestion(currentCheckInStep + 1);
+            }, 500);
+        }
+
+        function submitTextResponse() {
+            const text = document.getElementById('checkInText').value;
+            checkInResponses['win'] = text;
+            showCheckInQuestion(currentCheckInStep + 1);
+        }
+
+        function showCheckInComplete() {
+            const container = document.getElementById('selfCareContent');
+
+            // Generate personalized response
+            let response = '';
+
+            if (checkInResponses.breaks === 'No') {
+                response += "Remember, breaks aren't lazy—they're necessary. Tomorrow, try one small pause. 💜<br><br>";
+            }
+
+            if (checkInResponses.feeling === 'Stressed') {
+                response += "Stress is temporary. You've made it through hard days before. Take 3 deep breaths right now. 🌬️<br><br>";
+            } else if (checkInResponses.feeling === 'Tired') {
+                response += "Your body is asking for rest. Honor that tonight. Sleep heals. 😴<br><br>";
+            } else if (checkInResponses.feeling === 'Energized') {
+                response += "That energy is your reward for showing up! Ride that wave! 🌊<br><br>";
+            } else if (checkInResponses.feeling === 'Peaceful') {
+                response += "Peace is powerful. You created that calm. Beautiful. ✨<br><br>";
+            }
+
+            if (checkInResponses.grace === 'No') {
+                response += "Grace isn't earned—it's given. Give some to yourself right now. You deserve it.<br><br>";
+            }
+
+            if (checkInResponses.win) {
+                response += `<strong>Your win today:</strong> "${checkInResponses.win}"<br><br>Celebrate this! Every win matters. 🎉`;
+            }
+
+            container.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 3rem; margin-bottom: 15px;">💜</div>
+                    <h3 style="margin-bottom: 15px;">Thank you for checking in</h3>
+                    <div style="background: #F7FAFC; padding: 20px; border-radius: 15px; text-align: left; line-height: 1.8;">
+                        ${response}
+                    </div>
+                    <p style="margin-top: 20px; font-style: italic; color: var(--text-secondary);">
+                        Rest well tonight. Tomorrow is a new opportunity. 🌙
+                    </p>
+                </div>
+            `;
+
+            state.selfCareResponses.push({
+                date: new Date().toDateString(),
+                responses: { ...checkInResponses }
+            });
+
+            saveState();
+        }
+
+        // ============================================
+        // PROGRESS & BADGES
+        // ============================================
+
+        function updateWeeklyProgress() {
+            const container = document.getElementById('weeklyDays');
+            const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
+            container.innerHTML = state.weekProgress.map((completed, i) => `
+                <div class="weekly-day ${completed ? 'completed' : ''}">${days[i]}</div>
+            `).join('');
+
+            const completedDays = state.weekProgress.filter(d => d).length;
+            document.getElementById('weeklySummaryText').textContent =
+                `You hit ${completedDays}/7 days this week! ${completedDays >= 5 ? '🔥 Amazing!' : 'Keep going!'}`;
+        }
+
+        function populateBadges() {
+            const container = document.getElementById('badgesGrid');
+
+            container.innerHTML = BADGES.map(badge => {
+                const earned = badge.check(state);
+                if (earned && !state.badges.includes(badge.id)) {
+                    state.badges.push(badge.id);
+                    showToast(`🏆 New Badge Earned: ${badge.name}!`);
+                    triggerCelebration('mini');
+                }
+
+                return `
+                    <div class="badge ${earned ? 'earned' : 'locked'}">
+                        <div class="badge-icon">${badge.icon}</div>
+                        <div class="badge-name">${badge.name}</div>
+                        <div class="badge-progress">${badge.description}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateStats() {
+            document.getElementById('totalWorkouts').textContent = state.totalWorkouts;
+            document.getElementById('totalPrayers').textContent = state.totalPrayers;
+            document.getElementById('longestStreak').textContent = state.longestStreak;
+
+            // Calculate average sleep
+            const avgSleep = state.sleepLog.length > 0
+                ? (state.sleepLog.reduce((sum, s) => sum + s.hours, 0) / state.sleepLog.length).toFixed(1)
+                : 0;
+            document.getElementById('avgSleep').textContent = avgSleep;
+        }
+
+        // ============================================
+        // CELEBRATIONS & NOTIFICATIONS
+        // ============================================
+
+        function triggerCelebration(type) {
+            const container = document.getElementById('confetti-container');
+            const colors = ['#A78BFA', '#F2B5D4', '#F4A259', '#7EC8E3', '#6EE7B7', '#FF6B6B'];
+            const count = type === 'full' ? 100 : 30;
+
+            for (let i = 0; i < count; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                container.appendChild(confetti);
+
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function showBreathingReminder() {
+            document.getElementById('breathingOverlay').classList.add('active');
+
+            const instructions = ['Breathe in... 4 seconds', 'Hold... 4 seconds', 'Breathe out... 4 seconds', 'Hold... 4 seconds'];
+            let step = 0;
+
+            const interval = setInterval(() => {
+                step = (step + 1) % 4;
+                document.getElementById('breathingInstruction').textContent = instructions[step];
+            }, 4000);
+
+            // Store interval to clear later
+            document.getElementById('breathingOverlay').dataset.interval = interval;
+        }
+
+        function closeBreathing() {
+            const overlay = document.getElementById('breathingOverlay');
+            clearInterval(parseInt(overlay.dataset.interval));
+            overlay.classList.remove('active');
+        }
+
+        // ============================================
+        // MOOD CHECK-IN
+        // ============================================
+
+        let moodBreathingInterval = null;
+
+        function showMoodCheckin() {
+            // Always show mood check-in when app loads
+            // Reset the check-in date to force it to show
+            state.lastMoodCheckin = null;
+
+            // Reset all steps to initial state
+            document.querySelectorAll('.mood-step').forEach(step => step.classList.add('hidden'));
+            document.getElementById('moodQuestion').classList.remove('hidden');
+
+            // Show overlay
+            document.getElementById('moodCheckinOverlay').classList.add('active');
+        }
+
+        function handleMood(mood) {
+            // Hide question
+            document.getElementById('moodQuestion').classList.add('hidden');
+
+            switch(mood) {
+                case 'anxious':
+                case 'depressed':
+                    showMoodBreathing();
+                    break;
+                case 'tired':
+                    document.getElementById('moodTired').classList.remove('hidden');
+                    break;
+                case 'overwhelmed':
+                    document.getElementById('moodOverwhelmed').classList.remove('hidden');
+                    break;
+                case 'weak':
+                    document.getElementById('moodWeak').classList.remove('hidden');
+                    break;
+                case 'good':
+                    document.getElementById('moodGood').classList.remove('hidden');
+                    break;
+            }
+
+            // Save mood to state
+            state.lastMood = mood;
+            state.lastMoodCheckin = new Date().toDateString();
+            saveState();
+        }
+
+        function showMoodBreathing() {
+            document.querySelectorAll('.mood-step').forEach(step => step.classList.add('hidden'));
+            document.getElementById('moodBreathing').classList.remove('hidden');
+
+            const instructions = ['Breathe in... 4 seconds', 'Hold... 4 seconds', 'Breathe out... 4 seconds', 'Hold... 4 seconds'];
+            let step = 0;
+
+            document.getElementById('moodBreathingInstruction').textContent = instructions[0];
+
+            moodBreathingInterval = setInterval(() => {
+                step = (step + 1) % 4;
+                document.getElementById('moodBreathingInstruction').textContent = instructions[step];
+            }, 4000);
+        }
+
+        function showBreathingAfterPrayer() {
+            document.getElementById('moodOverwhelmed').classList.add('hidden');
+            showMoodBreathing();
+        }
+
+        function showNourishReminder() {
+            document.getElementById('moodWeak').classList.add('hidden');
+            document.getElementById('moodNourish').classList.remove('hidden');
+        }
+
+        function completeMoodCheckin() {
+            // Clear any breathing interval
+            if (moodBreathingInterval) {
+                clearInterval(moodBreathingInterval);
+                moodBreathingInterval = null;
+            }
+
+            // Hide overlay
+            document.getElementById('moodCheckinOverlay').classList.remove('active');
+
+            // Show welcome toast
+            showToast('Welcome! Let\'s have a great day');
+        }
+
+        function checkForReminders() {
+            // Check if sleep logged today
+            const today = new Date().toDateString();
+            const sleepToday = state.sleepLog.find(s => s.date === today);
+
+            if (sleepToday) {
+                document.getElementById('sleepMorningCard').innerHTML = `
+                    <div class="card-title">
+                        <span class="card-icon">😴</span>
+                        Sleep Logged
+                    </div>
+                    <p style="text-align: center; color: var(--green-dark); font-weight: 600;">
+                        ✅ You logged ${sleepToday.hours} hours of sleep today!
+                    </p>
+                `;
+            }
+        }
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // ============================================
+        // INITIALIZE APP
+        // ============================================
+
+        document.addEventListener('DOMContentLoaded', init);
+
+        // Service Worker Registration for Offline Support
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                // Service worker would be registered here for full offline support
+                console.log('Teshia\'s Daily System loaded!');
+            });
+        }
+    </script>
+</body>
+</html>
